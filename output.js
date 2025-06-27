@@ -1,961 +1,681 @@
-//Thu May 22 2025 01:07:29 GMT+0000 (Coordinated Universal Time)
+//Fri Jun 27 2025 01:09:31 GMT+0000 (Coordinated Universal Time)
 //Base:<url id="cv1cref6o68qmpt26ol0" type="url" status="parsed" title="GitHub - echo094/decode-js: JS混淆代码的AST分析工具 AST analysis tool for obfuscated JS code" wc="2165">https://github.com/echo094/decode-js</url>
 //Modify:<url id="cv1cref6o68qmpt26olg" type="url" status="parsed" title="GitHub - smallfawn/decode_action: 世界上本来不存在加密，加密的人多了，也便成就了解密" wc="741">https://github.com/smallfawn/decode_action</url>
-const $ = new Env("杰士邦安心福利社");
-const ckName = "jsb_data";
-$.appid = "";
-const Notify = 1;
-const notify = $.isNode() ? require("./sendNotify") : "";
-let envSplitor = ["@"];
-var userCookie = ($.isNode() ? process.env[ckName] : $.getdata(ckName)) || "";
-let userList = [];
-let userIdx = 0;
-let userCount = 0;
-$.is_debug = ($.isNode() ? process.env.IS_DEDUG : $.getdata("is_debug")) || "false";
-$.notifyList = [];
-$.notifyMsg = [];
-$.codeServer = ($.isNode() ? process.env.codeServer_address : $.getdata("@codeServer.address")) || "";
-$.codeOpen = ($.isNode() ? process.env.codeServer_open : $.getdata("@codeServer.open")) || "false";
-$.wxCode = $.codeOpen != "false" && $.codeServer && $.appid;
-async function main() {
-  try {
-    {
-      await getNotice();
-      $.log("\n================== 任务 ==================\n");
-      for (let _0x495a36 of userList) {
-        {
-          console.log("🔷账号" + _0x495a36.index + " >> Start work");
-          console.log("随机延迟" + _0x495a36.getRandomTime() + "ms");
-          let {
-            points: _0x1ef8c0
-          } = (await _0x495a36.getUserInfo()) ?? {};
-          if (_0x495a36.ckStatus) {
-            {
-              let _0x3f5eb8 = await _0x495a36.signin();
-              let _0x4e551f = await _0x495a36.share();
-              let _0x493d20 = await _0x495a36.getUserInfo();
-              $.title = "本次运行共获得" + (_0x493d20.points - _0x1ef8c0) + "安心币";
-              DoubleLog("用户名称:" + _0x493d20.nick_name + "\n签到任务:" + _0x3f5eb8 + "\n分享任务:" + _0x4e551f + "\n当前积分:" + _0x493d20.points);
-            }
-          } else {
-            $.notifyMsg.push("❌账号" + (_0x495a36.userName || _0x495a36.index) + " >> Check ck error!");
-          }
-          $.notifyList.push({
-            id: _0x495a36.index,
-            avatar: _0x495a36.avatar,
-            message: $.notifyMsg
-          });
-          $.notifyMsg = [];
+const _0xf6f52e = function () {
+  let _0x119746 = true;
+  return function (_0x4e91d2, _0x548351) {
+    const _0x4f4fb3 = _0x119746 ? function () {
+      {
+        if (_0x548351) {
+          const _0x2d52bf = _0x548351.apply(_0x4e91d2, arguments);
+          _0x548351 = null;
+          return _0x2d52bf;
         }
       }
-    }
-  } catch (_0x20e0da) {
-    {
-      $.log("⛔️ main run error => " + _0x20e0da);
-    }
-  }
-}
-class UserInfo {
-  constructor(_0x27f5f2) {
-    this.index = ++userIdx;
-    this.token = _0x27f5f2.token || _0x27f5f2;
-    this.userId = _0x27f5f2.userId;
-    this.userName = _0x27f5f2.userName;
-    this.avatar = _0x27f5f2.avatar;
-    this.ckStatus = true;
-    this.baseUrl = "";
-    this.host = "https://vip.ixiliu.cn";
-    this.headers = {
-      "Accept-Encoding": "gzip,compress,br,deflate",
-      "Access-Token": this.token,
-      platform: "MP-WEIXIN",
-      Host: "vip.ixiliu.cn",
-      "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.31(0x18001f37) NetType/WIFI Language/zh_CN",
-      Referer: "https://servicewechat.com/wx9a2dc52c95994011/80/page-frame.html",
-      sid: "10009"
-    };
-    this.getRandomTime = () => randomInt(1000, 3000);
-    this.fetch = async _0x468283 => {
-      {
-        try {
-          {
-            if (typeof _0x468283 === "string") {
-              _0x468283 = {
-                url: _0x468283
-              };
-            }
-            if (_0x468283?.["url"]?.["startsWith"]("/")) {
-              _0x468283.url = this.host + _0x468283.url;
-            }
-            const _0x16255d = {
-              ..._0x468283,
-              headers: _0x468283.headers || this.headers,
-              url: _0x468283.url || this.baseUrl
-            };
-            const _0x2b1b06 = await Request(_0x16255d);
-            debug(_0x2b1b06, _0x468283?.["url"]?.["replace"](/\/+$/, "")["substring"](_0x468283?.["url"]?.["lastIndexOf"]("/") + 1));
-            return _0x2b1b06;
-          }
-        } catch (_0x144199) {
-          {
-            this.ckStatus = false;
-            $.log("⛔️ 请求发起失败！" + _0x144199);
-          }
-        }
-      }
-    };
-  }
-  async getUserInfo() {
-    try {
-      {
-        let _0x2c2560 = await this.fetch("/mp/user/info");
-        if (_0x2c2560?.["status"] != 200) {
-          throw new Error(_0x2c2560?.["message"]);
-        }
-        return _0x2c2560?.["data"]?.["userInfo"];
-      }
-    } catch (_0x597a92) {
-      {
-        this.ckStatus = false;
-        $.log("⛔️ 获取用户信息失败！" + _0x597a92);
-      }
-    }
-  }
-  async signin() {
-    try {
-      {
-        let _0x96b75c = await this.fetch("/mp/sign/applyV2");
-        return _0x96b75c?.["message"];
-      }
-    } catch (_0x337597) {
-      {
-        $.log("⛔️ 查询任务列表失败！" + _0x337597);
-      }
-    }
-  }
-  async share() {
-    try {
-      {
-        const _0x14d54e = {
-          project_id: "pages/guess/index?project_id=333480658633344"
-        };
-        let _0x4417a8 = {
-          url: "/mp/guess.home/share",
-          params: _0x14d54e
-        };
-        let _0x28614e = await this.fetch(_0x4417a8);
-        return _0x28614e?.["data"]?.["message"];
-      }
-    } catch (_0x54c64d) {
-      {
-        $.log("⛔️ 查询任务列表失败！" + _0x54c64d);
-      }
-    }
-  }
-}
-async function getCookie() {
-  if ($request && $request.method === "OPTIONS") {
-    return;
-  }
-  const _0x1d2a4f = ObjectKeys2LowerCase($request.headers);
-  const _0xfe49f1 = $.toObj($response.body);
-  let _0x276ed8 = _0x1d2a4f["access-token"];
-  if (!(_0xfe49f1?.["data"]?.["userInfo"] && _0x276ed8)) {
-    {
-      $.msg($.name, "❌获取token失败!", "");
-      return;
-    }
-  }
-  const {
-    user_id: _0x42c0de,
-    nick_name: _0x2dad7e
-  } = _0xfe49f1?.["data"]?.["userInfo"];
-  const _0x43819e = {
-    userId: _0x42c0de,
-    avatar: "",
-    token: _0x276ed8,
-    userName: _0x2dad7e
+    } : function () {};
+    _0x119746 = false;
+    return _0x4f4fb3;
   };
-  userCookie = userCookie ? JSON.parse(userCookie) : [];
-  const _0x56abb7 = userCookie.findIndex(_0x19fb5d => _0x19fb5d.userId == _0x43819e.userId);
-  userCookie[_0x56abb7] ? userCookie[_0x56abb7] = _0x43819e : userCookie.push(_0x43819e);
-  $.setjson(userCookie, ckName);
-  $.msg($.name, "🎉" + _0x43819e.userName + "更新token成功!", "");
-}
-async function loadModule() {
+}();
+(function () {
+  _0xf6f52e(this, function () {
+    {
+      const _0x4020b8 = new RegExp("function *\\( *\\)"),
+        _0x28f8c9 = new RegExp("\\+\\+ *(?:[a-zA-Z_$][0-9a-zA-Z_$]*)", "i"),
+        _0x466904 = _0x1ce874("init");
+      !_0x4020b8.test(_0x466904 + "chain") || !_0x28f8c9.test(_0x466904 + "input") ? _0x466904("0") : _0x1ce874();
+    }
+  })();
+})();
+const _0x5e08cb = require("axios"),
+  _0x57a08b = require("fs"),
+  _0x1275a3 = "/ql/data/scripts/羊毛_网络/账号";
+let _0x4c0ec9 = "可乐";
+const _0x5c02e1 = JSON.parse(_0x57a08b.readFileSync(_0x1275a3 + "/" + _0x4c0ec9));
+let _0x328c72 = _0x5c02e1[0].log && _0x5c02e1[0].log == "德玛西亚牛逼" ? _0x5c02e1[0].log : "",
+  _0x3c27f4 = _0x5c02e1[0].log && _0x5c02e1[0].log == "开" ? _0x5c02e1[0].log : "",
+  _0x144acd = [112739, 104288],
+  _0xbcd89e = [104288, 127817];
+getlin = async function (_0x36139d) {
+  _0x5c02e1[_0x372b1d[_0x36139d]]["开"] && _0x5c02e1[_0x372b1d[_0x36139d]]["开"] == "关" ? _0x36139d = _0x36139d : _0x36139d = _0x372b1d[_0x36139d];
   try {
-    {
-      $.SakuraUtils = await loadSakuraUtils();
-      return $.SakuraUtils ? true : false;
-    }
-  } catch (_0x2c667f) {
-    {
-      throw new Error("❌loadModule run error => " + _0x2c667f);
-    }
+    _0x5c02e1[_0x36139d].yemian = await _0x4d2728("http://m.hbty003.cn/new");
+    console.log(_0x5c02e1[_0x36139d].yemian);
+    await _0x2e5fc0(_0x36139d);
+  } catch (_0x125171) {
+    console.error("请求出错:", _0x125171.message);
   }
-}
-async function getWxToken(_0x10f30f) {
-  try {
-    {
-      const _0x5aa6d7 = {
-        url: "https://ulp.michelin.com.cn/bff/wechat/login/" + _0x10f30f,
-        dataType: "json",
-        headers: {}
-      };
-      _0x5aa6d7.headers.Host = "ulp.michelin.com.cn";
-      _0x5aa6d7.headers["User-Agent"] = "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.31(0x18001f37) NetType/WIFI Language/zh_CN";
-      _0x5aa6d7.headers.Referer = "https://servicewechat.com/wx14413dafd16b9540/130/page-frame.html";
-      const _0x25430d = _0x5aa6d7;
-      let _0x67e197 = await Request(_0x25430d);
-      let _0x40c134 = "Bearer " + _0x67e197?.["data"]?.["token"]?.["access_token"];
-      return _0x40c134;
-    }
-  } catch (_0x152787) {
-    {
-      $.log("❌getWxToken run error => " + _0x152787);
-    }
-  }
-}
-async function checkCodeServer() {
-  try {
-    {
-      $.codeFuc = ($.isNode() ? process.env.codeServer_fun : $.getdata("@codeServer.fun")) || "";
-      let _0x10acc3 = $.codeFuc ? (eval($.codeFuc), await WxCode($.appid)) : (await Request({
-        url: $.codeServer + "/?wxappid=" + $.appid
-      }))?.["split"]("|") || [];
-      _0x10acc3 = _0x10acc3.filter(_0x218865 => _0x218865.toString().length === 32);
-      debug(_0x10acc3);
-      !_0x10acc3.length ? $.log("❌获取code授权失败！请检查服务器运行是否正常 => 尝试读取数据持久化 ") : $.log("✅获取code授权成功！当前code数量为" + _0x10acc3.length);
-      let _0x20c8c5 = await Promise.all(_0x10acc3.map(async _0x4e68d0 => {
-        {
-          const _0x5c6ab6 = await getWxToken(_0x4e68d0);
-          const _0x2ec778 = {
-            token: _0x5c6ab6
-          };
-          return _0x2ec778;
-        }
-      }));
-      _0x20c8c5 = _0x20c8c5.filter(_0x2e0c58 => Object.keys(_0x2e0c58).length !== 0);
-      return _0x20c8c5;
-    }
-  } catch (_0x44e1f6) {
-    $.log("❌checkCodeServer run error => " + _0x44e1f6);
-  }
-}
-async function checkEnv() {
-  try {
-    {
-      let _0x1bf3e1 = [];
-      if ($.wxCode) {
-        _0x1bf3e1 = (await checkCodeServer()) || [];
-      } else {
-        if (!userCookie || !userCookie.length) {
-          {
-            console.log("未找到CK");
-            return;
-          }
-        }
-      }
-      if (!_0x1bf3e1.length) {
-        {
-          const _0xbaddb = envSplitor.find(_0x2c4d4c => userCookie.includes(_0x2c4d4c)) || envSplitor[0];
-          userCookie = $.toObj(userCookie) || userCookie.split(_0xbaddb);
-          _0x1bf3e1 = userCookie;
-        }
-      }
-      userList.push(..._0x1bf3e1.map(_0x11159b => new UserInfo(_0x11159b)).filter(Boolean));
-      userCount = userList.length;
-      console.log("共找到" + userCount + "个账号");
-      return true;
-    }
-  } catch (_0x53efdd) {
-    {
-      throw new Error("❌checkEnv run error => " + _0x53efdd);
-    }
-  }
-}
-async function Request(_0x2a5ded) {
-  if (typeof _0x2a5ded === "string") {
-    _0x2a5ded = {
-      url: _0x2a5ded
-    };
-  }
-  try {
-    {
-      if (!_0x2a5ded?.["url"]) {
-        throw new Error("[发送请求] 缺少 url 参数");
-      }
-      let {
-        url: _0x54db3b,
-        type: _0x17417d,
-        headers = {},
-        body: _0x3678fd,
-        params: _0x339704,
-        dataType = "form",
-        deviceType = "mobile",
-        resultType = "data"
-      } = _0x2a5ded;
-      const _0x1de4b6 = _0x17417d ? _0x17417d?.["toLowerCase"]() : "body" in _0x2a5ded ? "post" : "get";
-      const _0x3d9721 = _0x54db3b.concat(_0x1de4b6 === "post" ? "?" + $.SakuraUtils.JsonToUrl(_0x339704) : "");
-      const _0x2b8738 = _0x2a5ded.timeout ? $.isSurge() ? _0x2a5ded.timeout / 1000 : _0x2a5ded.timeout : 10000;
-      headers["User-Agent"] ||= headers["User-Agent"] = deviceType === "pc" ? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36 Edge/16.16299" : "Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1";
-      if (dataType === "json") {
-        headers["Content-Type"] = "application/json;charset=UTF-8";
-      }
-      const _0x191ea5 = _0x1de4b6 === "post" && _0x3678fd ? _0x2a5ded.dataType === "form" && typeof _0x3678fd === "object" ? $.SakuraUtils.JsonToUrl(_0x3678fd) : _0x3678fd : "";
-      const _0x1ffc33 = {
-        body: _0x191ea5
-      };
-      const _0x48a06e = {
-        ..._0x2a5ded,
-        ...(_0x2a5ded?.["opts"] ? _0x2a5ded.opts : {}),
-        url: _0x3d9721,
-        headers: headers,
-        ...(_0x1de4b6 === "post" && _0x1ffc33),
-        ...(_0x1de4b6 === "get" && _0x339704 && {
-          params: _0x339704
-        }),
-        timeout: _0x2b8738
-      };
-      const _0x17f49d = $.http[_0x1de4b6.toLowerCase()](_0x48a06e).then(_0xc51948 => resultType == "data" ? $.toObj(_0xc51948.body) || _0xc51948.body : $.toObj(_0xc51948) || _0xc51948).catch(_0x3107eb => $.log("❌请求发起失败！原因为：" + _0x3107eb));
-      return Promise.race([new Promise((_0x45c912, _0x2210a0) => setTimeout(() => _0x2210a0("当前请求已超时"), _0x2b8738)), _0x17f49d]);
-    }
-  } catch (_0x353082) {
-    console.log("❌请求发起失败！原因为：" + _0x353082);
-  }
-}
-function randomInt(_0x3d5bdd, _0x413297) {
-  return Math.round(Math.random() * (_0x413297 - _0x3d5bdd) + _0x3d5bdd);
-}
-function DoubleLog(_0x138d84) {
-  if (_0x138d84 && $.isNode()) {
-    {
-      console.log("" + _0x138d84);
-      $.notifyMsg.push("" + _0x138d84);
-    }
-  } else {
-    if (_0x138d84) {
-      {
-        console.log("" + _0x138d84);
-        $.notifyMsg.push("" + _0x138d84);
-      }
-    }
-  }
-}
-function debug(_0x407294, _0x3c111c = "debug") {
-  $.is_debug === "true" && ($.log("\n-----------" + _0x3c111c + "------------\n"), $.log(typeof _0x407294 == "string" ? _0x407294 : $.toStr(_0x407294) || "debug error => t=" + _0x407294), $.log("\n-----------" + _0x3c111c + "------------\n"));
-}
-function getQueries(_0x25cbd0) {
-  const [, _0x522049] = _0x25cbd0.split("?");
-  return _0x522049 ? _0x522049.split("&").reduce((_0x13ea04, _0x572b57) => {
-    {
-      var [_0x13b595, _0x572b57] = _0x572b57.split("=");
-      _0x13ea04[_0x13b595] = _0x572b57;
-      return _0x13ea04;
-    }
-  }, {}) : {};
-}
-async function getNotice() {
-  const _0x3161b3 = ["https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/notice.json", "https://raw.githubusercontent.com/Sliverkiss/GoodNight/main/tip.json"];
-  try {
-    const _0x4b163e = await Promise.all(_0x3161b3.map(_0x11af59 => Request(_0x11af59)));
-    _0x4b163e.map(_0x2e2f53 => console.log(_0x2e2f53?.["notice"] || "获取通知失败"));
-  } catch (_0x3cfbad) {
-    console.log("❌获取通知时发生错误：" + _0x3cfbad);
-  }
-}
-async function SendMsgList(_0x4d8956) {
-  await Promise.allSettled(_0x4d8956?.["map"](_0x59b7cb => SendMsg(_0x59b7cb.message.join("\n"), _0x59b7cb.avatar)));
-}
-async function SendMsg(_0xdc5cd0, _0x404f81) {
-  const _0x5b2a60 = {
-    "media-url": _0x404f81
-  };
-  _0xdc5cd0 && (0 < Notify ? $.isNode() ? await notify.sendNotify($.name, _0xdc5cd0) : $.msg($.name, $.title || "", _0xdc5cd0, _0x5b2a60) : console.log(_0xdc5cd0));
-}
-function ObjectKeys2LowerCase(_0x35379c) {
-  _0x35379c = Object.fromEntries(Object.entries(_0x35379c).map(([_0x21b2b1, _0x4c615a]) => [_0x21b2b1.toLowerCase(), _0x4c615a]));
-  return new Proxy(_0x35379c, {
-    get: function (_0x138f3c, _0x38ed21, _0x5d4d45) {
-      return Reflect.get(_0x138f3c, _0x38ed21.toLowerCase(), _0x5d4d45);
-    },
-    set: function (_0x426e5c, _0x391a7a, _0x16b613, _0x24e99c) {
-      return Reflect.set(_0x426e5c, _0x391a7a.toLowerCase(), _0x16b613, _0x24e99c);
-    }
-  });
-}
-async function loadSakuraUtils() {
-  let _0x206f9b = ($.isNode() ? process.env.SakuraUtil_code : $.getdata("SakuraUtil_code")) || "";
-  if (_0x206f9b && Object.keys(_0x206f9b).length) {
-    console.log("✅" + $.name + ":缓存中存在SakuraUtil代码,跳过下载");
-    eval(_0x206f9b);
-    return creatUtils();
-  }
-  console.log("🚀" + $.name + ":开始下载SakuraUtil代码");
-  return new Promise(async _0x38d376 => {
-    $.getScript("https://cdn.jsdelivr.net/gh/Sliverkiss/QuantumultX@main/Utils/SakuraUtil.js").then(_0x51de10 => {
-      $.setdata(_0x51de10, "SakuraUtil_code");
-      eval(_0x51de10);
-      const _0x4de6fb = creatUtils();
-      console.log("✅SakuraUtil加载成功,请继续");
-      _0x38d376(_0x4de6fb);
+};
+let _0xedf133 = 2,
+  _0x40cca9 = 180;
+初始化 = async function () {
+  console.log("本脚本入口http://m.ww1112494.cn/r?upuid=112739 ");
+  console.log("频道：https://t.me/+iDGHUdtEdTQ2NDI1，本子都是锁头的 不愿意当下线的就不要来了");
+  let _0x4f4103 = await _0x5e08cb.get("https://sharechain.qq.com/d9c79598fabd7b0603e9c2331b5d4e07");
+};
+延时 = async (_0x1b56b5, _0x4944e7 = 0) => {
+  _0x4944e7 && console.log("🤷‍♀️" + new Date().toLocaleString() + ",代号【" + _0x4944e7 + "】⌛⌛倒计时" + _0x1b56b5 + "🤷‍♂️");
+  return new Promise(_0x5b72d3 => setTimeout(_0x5b72d3, _0x1b56b5));
+};
+随机数 = (_0x270237, _0x28b167) => Math.round(Math.random() * (_0x28b167 - _0x270237) + _0x270237);
+async function _0x4d2728(_0x3ea252) {
+  const _0x541f54 = require("http");
+  return new Promise((_0x39bb71, _0x589f66) => {
+    _0x541f54.get(_0x3ea252, _0x2a39ba => {
+      if (_0x2a39ba.statusCode === 301 || _0x2a39ba.statusCode === 302) {
+        const _0x4ed92 = _0x2a39ba.headers.location;
+        _0x39bb71(_0x4ed92);
+      } else _0x39bb71(_0x3ea252);
+    }).on("error", _0x53d2e2 => {
+      _0x589f66(_0x53d2e2);
     });
   });
 }
-!(async () => {
-  if (typeof $request != "undefined") {
-    await getCookie();
-  } else {
-    if (!(await loadModule())) {
-      throw new Error("❌加载模块失败，请检查模块路径是否正常");
-    }
-    if (!(await checkEnv())) {
-      throw new Error("❌未检测到ck，请添加环境变量");
-    }
-    if (userList.length > 0) {
-      await main();
-    }
-  }
-})().catch(_0x5c6368 => $.notifyMsg.push(_0x5c6368.message || _0x5c6368)).finally(async () => {
-  await SendMsgList($.notifyList);
-  const _0x166a18 = {
-    ok: 1
-  };
-  $.done(_0x166a18);
-});
-function Env(t, e) {
-  class s {
-    constructor(t) {
-      this.env = t;
-    }
-    send(t, e = "GET") {
-      t = "string" == typeof t ? {
-        url: t
-      } : t;
-      let s = this.get;
-      "POST" === e && (s = this.post);
-      return new Promise((e, a) => {
-        s.call(this, t, (t, s, r) => {
-          t ? a(t) : e(s);
-        });
-      });
-    }
-    get(t) {
-      return this.send.call(this.env, t);
-    }
-    post(t) {
-      return this.send.call(this.env, t, "POST");
-    }
-  }
-  return new class {
-    constructor(t, e) {
-      this.name = t;
-      this.http = new s(this);
-      this.data = null;
-      this.dataFile = "box.dat";
-      this.logs = [];
-      this.isMute = false;
-      this.isNeedRewrite = false;
-      this.logSeparator = "\n";
-      this.encoding = "utf-8";
-      this.startTime = new Date().getTime();
-      Object.assign(this, e);
-      this.log("", `🔔${this.name}, 开始!`);
-    }
-    getEnv() {
-      return "undefined" != typeof $environment && $environment["surge-version"] ? "Surge" : "undefined" != typeof $environment && $environment["stash-version"] ? "Stash" : "undefined" != typeof module && module.exports ? "Node.js" : "undefined" != typeof $task ? "Quantumult X" : "undefined" != typeof $loon ? "Loon" : "undefined" != typeof $rocket ? "Shadowrocket" : undefined;
-    }
-    isNode() {
-      return "Node.js" === this.getEnv();
-    }
-    isQuanX() {
-      return "Quantumult X" === this.getEnv();
-    }
-    isSurge() {
-      return "Surge" === this.getEnv();
-    }
-    isLoon() {
-      return "Loon" === this.getEnv();
-    }
-    isShadowrocket() {
-      return "Shadowrocket" === this.getEnv();
-    }
-    isStash() {
-      return "Stash" === this.getEnv();
-    }
-    toObj(t, e = null) {
-      try {
-        return JSON.parse(t);
-      } catch {
-        return e;
+async function _0x2e5fc0(_0x7a8f71) {
+  try {
+    let _0xfa9f68 = await _0x5e08cb.get(_0x5c02e1[_0x7a8f71].yemian, {
+      "params": {
+        "upuid": ""
+      },
+      "headers": {
+        "Host": _0x5c02e1[_0x7a8f71].yemian.split("http://")[1].split("/")[0],
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "X-Requested-With": "com.tencent.mm",
+        "User-Agent": _0x5c02e1[_0x7a8f71]["User-Agent"],
+        "Cookie": _0x5c02e1[_0x7a8f71].ck
       }
-    }
-    toStr(t, e = null) {
-      try {
-        return JSON.stringify(t);
-      } catch {
-        return e;
-      }
-    }
-    getjson(t, e) {
-      let s = e;
-      const a = this.getdata(t);
-      if (a) {
-        try {
-          s = JSON.parse(this.getdata(t));
-        } catch {}
-      }
-      return s;
-    }
-    setjson(t, e) {
-      try {
-        return this.setdata(JSON.stringify(t), e);
-      } catch {
-        return false;
-      }
-    }
-    getScript(t) {
-      return new Promise(e => {
-        this.get({
-          url: t
-        }, (t, s, a) => e(a));
-      });
-    }
-    runScript(t, e) {
-      return new Promise(s => {
-        let a = this.getdata("@chavy_boxjs_userCfgs.httpapi");
-        a = a ? a.replace(/\n/g, "").trim() : a;
-        let r = this.getdata("@chavy_boxjs_userCfgs.httpapi_timeout");
-        r = r ? 1 * r : 20;
-        r = e && e.timeout ? e.timeout : r;
-        const [i, o] = a.split("@");
-        const n = {
-          url: `http://${o}/v1/scripting/evaluate`,
-          body: {
-            script_text: t,
-            mock_type: "cron",
-            timeout: r
-          },
-          headers: {
-            "X-Key": i,
-            Accept: "*/*"
-          },
-          timeout: r
-        };
-        this.post(n, (t, e, a) => s(a));
-      }).catch(t => this.logErr(t));
-    }
-    loaddata() {
-      if (!this.isNode()) {
-        return {};
-      }
+    });
+    let _0x365797 = "https://dtfk.oss-cn-beijing.aliyuncs.com/js/chunk-bc46a562.bb0e746c.js";
+    if (_0xfa9f68.status == 200 && _0xfa9f68.data.includes(_0x365797)) {
       {
-        this.fs = this.fs ? this.fs : require("fs");
-        this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile);
-        const e = this.path.resolve(process.cwd(), this.dataFile);
-        const s = this.fs.existsSync(t);
-        const a = !s && this.fs.existsSync(e);
-        if (!s && !a) {
-          return {};
-        }
+        console.log("初始化....");
+        let _0x4a577a = await _0x5e08cb.get(_0x365797);
+        _0x5c02e1[_0x7a8f71]["二维码"] = _0x4a577a.data.split(";o[\"a\"].get(r[\"a\"].baseUrl+\"")[1].split("\").")[0];
+        _0x5c02e1[_0x7a8f71]["推荐接口"] = _0x4a577a.data.split("{o[\"a\"].get(r[\"a\"].baseUrl+\"")[1].split("\").")[0];
+        _0x5c02e1[_0x7a8f71]["二维码"] && _0x5c02e1[_0x7a8f71]["推荐接口"] ? (console.log("初始化成功"), await _0x5c59be(_0x7a8f71, 1)) : console.log("平台可能有更新了");
+      }
+    } else console.log("登录异常");
+  } catch (_0x59d62e) {
+    console.log("异常", _0x59d62e);
+  }
+}
+async function _0x5c59be(_0x25f646, _0x37bd2f) {
+  await 延时(await 随机数(800, 1000));
+  const _0x286abf = {
+    "url": "" + _0x5c02e1[_0x25f646].yemian.split("/new")[0] + _0x5c02e1[_0x25f646]["推荐接口"],
+    "method": "GET",
+    "timeout": 8000,
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "X-Requested-With": "com.tencent.mm",
+      "Host": _0x5c02e1[_0x25f646].yemian.split("http://")[1].split("/new")[0],
+      "Referer": _0x5c02e1[_0x25f646].yemian + "?upuid=",
+      "User-Agent": _0x5c02e1[_0x25f646]["User-Agent"],
+      "Cookie": _0x5c02e1[_0x25f646].ck
+    }
+  };
+  let _0x55bcc6 = await _0x5e08cb(_0x286abf);
+  if (_0x55bcc6) {
+    if (_0x37bd2f) {
+      if (_0x55bcc6.data.code == 0) {
         {
-          const a = s ? t : e;
-          try {
-            return JSON.parse(this.fs.readFileSync(a));
-          } catch (t) {
-            return {};
+          console.log(_0x5c02e1[_0x25f646].name, "我的id", _0x55bcc6.data.data.user.uid, "我的上线:", _0x55bcc6.data.data.user.upuid);
+          if (_0x55bcc6.data.data.user && (_0x144acd.includes(Number(_0x55bcc6.data.data.user.upuid)) || _0xbcd89e.includes(Number(_0x55bcc6.data.data.user.uid)))) {
+            {
+              console.log(new Date().toLocaleString(), _0x5c02e1[_0x25f646].name, "账户余额", _0x55bcc6.data.data.user.score * 100, "今日已读", _0x55bcc6.data.data.infoView.num, "今日阅读奖励", _0x55bcc6.data.data.infoView.score * 100);
+              _0x5c02e1[_0x25f646].upuid = _0x55bcc6.data.data.user.upuid;
+              _0x5c02e1[_0x25f646]["账户余额"] = _0x55bcc6.data.data.user.score * 100;
+              _0x5c02e1[_0x25f646]["今日已读"] = _0x55bcc6.data.data.infoView.num;
+              _0x55bcc6.data.data.user.score > Number(_0x5c02e1[_0x25f646]["提现门槛"] * 100) && (await wx_tx(_0x25f646), await 延时(10000));
+              if (_0x55bcc6.data.data.user.rebate_count == 0) console.log("恭喜你已被拉入黑名单，放弃这个阅读项目吧");else {
+                console.log(_0x55bcc6.data.data.infoView.status);
+                if (!_0x55bcc6.data.data.infoView.msg) {
+                  {
+                    if (Number(_0x55bcc6.data.data.infoView.rest) == 1) await get_read_url(_0x25f646);else Number(_0x55bcc6.data.data.infoView.rest) == 30 || Number(_0x55bcc6.data.data.infoView.num) + Number(_0x55bcc6.data.data.infoView.rest) == 200 ? (_0x5c02e1[_0x25f646]["阅读序列"] = _0x55bcc6.data.data.infoView.rest, await get_read_url(_0x25f646)) : console.log(_0x5c02e1[_0x25f646].name, "目前账户未处在最优状态不进行阅读");
+                  }
+                } else console.log(_0x5c02e1[_0x25f646].name, _0x55bcc6.data.data.infoView.msg);
+              }
+            }
+          } else console.log(_0x5c02e1[_0x25f646].name, "不是我的下线");
+        }
+      } else console.log(_0x5c02e1[_0x25f646].name, "登录异常应该是ck失效了");
+    } else return _0x5c02e1[_0x25f646]["剩余未读"] = _0x5c02e1[_0x25f646]["阅读序列"] = _0x55bcc6.data.data.infoView.rest, _0x5c02e1[_0x25f646]["账户余额"] = _0x55bcc6.data.data.user.score * 100, _0x5c02e1[_0x25f646]["今日已读"] = _0x55bcc6.data.data.infoView.num, _0x55bcc6.data.data.infoView.rest == 1 ? _0x5c02e1[_0x25f646]["阅读序列1"] ? false : true : (_0x5c02e1[_0x25f646]["阅读序列1"] = _0x55bcc6.data.data.infoView.rest == 2 ? _0x55bcc6.data.data.infoView.rest : false, false);
+  }
+}
+get_read_url = async function (_0x14aa32, _0x4b0491) {
+  const _0x557f6c = {
+    "url": "" + _0x5c02e1[_0x14aa32].yemian.split("/new")[0] + _0x5c02e1[_0x14aa32]["二维码"],
+    "method": "GET",
+    "timeout": 8000,
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "X-Requested-With": "com.tencent.mm",
+      "Host": _0x5c02e1[_0x14aa32].yemian.split("http://")[1].split("/new")[0],
+      "Referer": _0x5c02e1[_0x14aa32].yemian + "?upuid=",
+      "User-Agent": _0x5c02e1[_0x14aa32]["User-Agent"],
+      "Cookie": _0x5c02e1[_0x14aa32].ck
+    }
+  };
+  _0x5c02e1[_0x14aa32]["肉鸡模式"] ? _0x557f6c.url = _0x557f6c.url + "&for=" + _0x5c02e1[_0x14aa32]["肉鸡模式"] : "";
+  let _0xacbf6 = await _0x5e08cb(_0x557f6c);
+  _0x5c02e1[_0x14aa32].ui = _0xacbf6 && _0xacbf6.data && _0xacbf6.data.jump ? _0xacbf6.data.jump : "";
+  console.log(_0x5c02e1[_0x14aa32].ui);
+  _0x5c02e1[_0x14aa32].ui ? await gettck(_0x14aa32, _0x4b0491) : console.log(new Date().toLocaleString(), _0x5c02e1[_0x14aa32].name, "获取任务识败");
+};
+get_read_url2 = async function (_0x37db50) {
+  await 延时(await 随机数(800, 1000));
+  const _0xb51a10 = {
+    "url": "" + _0x5c02e1[_0x37db50].yemian.split("/new")[0] + _0x5c02e1[_0x37db50]["二维码"],
+    "method": "GET",
+    "timeout": 8000,
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "X-Requested-With": "com.tencent.mm",
+      "Host": _0x5c02e1[_0x37db50].yemian.split("http://")[1].split("/new")[0],
+      "Referer": _0x5c02e1[_0x37db50].yemian + "?upuid=",
+      "User-Agent": _0x5c02e1[_0x37db50]["User-Agent"],
+      "Cookie": _0x5c02e1[_0x37db50].ck
+    }
+  };
+  _0x5c02e1[_0x37db50]["肉鸡模式"] ? _0xb51a10.url = _0xb51a10.url + "&for=" + _0x5c02e1[_0x37db50]["肉鸡模式"] : "";
+  let _0x53aaf6 = await _0x5e08cb(_0xb51a10);
+};
+gettck = async function (_0xc15b01, _0x1ee39a) {
+  await 延时(await 随机数(800, 1000));
+  if (_0x5c02e1[_0xc15b01]["肉鸡模式"]) {
+    const _0xb0f2c4 = {
+      "url": _0x5c02e1[_0xc15b01].ui + "&for=" + _0x5c02e1[_0xc15b01]["肉鸡模式"],
+      "method": "GET",
+      "timeout": 8000,
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "X-Requested-With": "com.tencent.mm",
+        "Host": _0x5c02e1[_0xc15b01].ui.split("http://")[1].split("/tuijian")[0],
+        "Upgrade-Insecure-Requests": "1",
+        "User-Agent": _0x5c02e1[_0xc15b01]["User-Agent"]
+      }
+    };
+    let _0x38d2ea = await _0x5e08cb(_0xb0f2c4);
+    _0x38d2ea && (_0x328c72 ? console.log(_0x38d2ea.request.res.responseUrl) : "", _0x38d2ea.request.res.responseUrl && (_0x5c02e1[_0xc15b01]["肉鸡页面"] = _0x38d2ea.request.res.responseUrl, await _0xd2d3e7(), _0x5c02e1[_0xc15b01]["肉鸡页面"] && (await do_read(_0xc15b01))));
+  } else await _0xd2d3e7();
+  async function _0xd2d3e7() {
+    const _0x1ceb59 = {
+      "url": "" + _0x5c02e1[_0xc15b01].ui,
+      "method": "GET",
+      "timeout": 8000,
+      "headers": {
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/wxpic,image/tpg,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Accept-Encoding": "gzip, deflate",
+        "Connection": "keep-alive",
+        "Host": _0x5c02e1[_0xc15b01].ui.split("http://")[1].split("/")[0],
+        "Upgrade-Insecure-Requests": "1",
+        "X-Requested-With": "com.tencent.mm",
+        "User-Agent": _0x5c02e1[_0xc15b01]["User-Agent"]
+      }
+    };
+    if (_0x5c02e1[_0xc15b01]["肉鸡模式"]) {
+      _0x1ceb59.url = _0x5c02e1[_0xc15b01]["肉鸡页面"];
+      _0x1ceb59.headers.Host = _0x5c02e1[_0xc15b01]["肉鸡页面"].split("http://")[1].split("/tuijian")[0];
+      let _0x210341 = await _0x5e08cb(_0x1ceb59);
+    } else {
+      let _0x5f5d53 = await _0x5e08cb(_0x1ceb59);
+      _0x5c02e1[_0xc15b01].cookie = _0x5f5d53.headers["set-cookie"][0].split(";")[0];
+      _0x5c02e1[_0xc15b01].js = _0x5f5d53.data.split("src=\"")[1].split("\">")[0];
+      _0x5c02e1[_0xc15b01].jkey = "";
+      _0x5c02e1[_0xc15b01].cookie && _0x5c02e1[_0xc15b01].js ? await get入口(_0xc15b01, _0x1ee39a) : console.log(new Date().toLocaleString(), _0x5c02e1[_0xc15b01].name, "登录失败");
+    }
+  }
+};
+get入口 = async function (_0xb1ec06, _0x3c6f0d) {
+  const _0x1b4c31 = {
+    "url": "http://" + _0x5c02e1[_0xb1ec06].ui.split("http://")[1].split("/")[0] + _0x5c02e1[_0xb1ec06].js,
+    "method": "GET",
+    "timeout": 8000,
+    "headers": {
+      "Accept": "*/*",
+      "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "Host": _0x5c02e1[_0xb1ec06].ui.split("http://")[1].split("/")[0],
+      "X-Requested-With": "com.tencent.mm",
+      "User-Agent": _0x5c02e1[_0xb1ec06]["User-Agent"],
+      "Cookie": _0x5c02e1[_0xb1ec06].cookie
+    }
+  };
+  let _0x4a31c0 = await _0x5e08cb(_0x1b4c31);
+  _0x5c02e1[_0xb1ec06]["阅读入口1"] = _0x4a31c0.data.split("url = '")[1].split("'")[0];
+  _0x5c02e1[_0xb1ec06]["阅读入口2"] = _0x4a31c0.data.split("forstr+'")[1].split("'")[0];
+  _0x5c02e1[_0xb1ec06]["阅读入口3"] = _0x4a31c0.data.split("jumpUrl + '")[1].split("'")[0];
+  if (_0x5c02e1[_0xb1ec06]["阅读入口1"] && _0x5c02e1[_0xb1ec06]["阅读入口2"] && _0x5c02e1[_0xb1ec06]["阅读入口3"]) {
+    _0x5c02e1[_0xb1ec06]["阅读入口"] = _0x5c02e1[_0xb1ec06]["阅读入口1"] + _0x5c02e1[_0xb1ec06]["阅读入口2"] + _0x5c02e1[_0xb1ec06]["阅读入口3"];
+    await do_read(_0xb1ec06, _0x3c6f0d);
+  } else console.log("阅读解析异常");
+};
+do_read = async function (_0x3a441f, _0x936ef9 = 0) {
+  await get_read_url2(_0x3a441f);
+  await 延时(await 随机数(800, 1000));
+  let _0x1a2a62 = _0x5c02e1[_0x3a441f]["肉鸡模式"] ? _0x5c02e1[_0x3a441f]["肉鸡页面"].split("/tuijian/")[0] + "/tuijian/do_read" : "http://" + _0x5c02e1[_0x3a441f].ui.split("http://")[1].split("/")[0] + _0x5c02e1[_0x3a441f]["阅读入口"],
+    _0x47e464 = _0x5c02e1[_0x3a441f]["肉鸡模式"] ? _0x5c02e1[_0x3a441f]["肉鸡页面"] : _0x5c02e1[_0x3a441f].ui;
+  const _0x400637 = {
+    "url": _0x1a2a62 + Math.random() + "&iu=" + _0x47e464.split("?iu=")[1],
+    "method": "GET",
+    "timeout": 8000,
+    "headers": {
+      "Accept": "*/*",
+      "Host": _0x47e464.split("http://")[1].split("/")[0],
+      "Connection": "keep-alive",
+      "Referer": _0x47e464,
+      "User-Agent": _0x5c02e1[_0x3a441f]["User-Agent"],
+      "X-Requested-With": "XMLHttpRequest",
+      "Cookie": _0x5c02e1[_0x3a441f].cookie,
+      "Accept-Language": "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7",
+      "Accept-Encoding": "gzip, deflate"
+    }
+  };
+  _0x5c02e1[_0x3a441f].jkey ? _0x400637.url = _0x400637.url + "&jkey=" + _0x5c02e1[_0x3a441f].jkey : _0x400637.url;
+  _0x5c02e1[_0x3a441f]["肉鸡模式"] && (_0x400637.params.for = _0x5c02e1[_0x3a441f]["肉鸡模式"], _0x400637.headers.Cookie = _0x5c02e1[_0x3a441f].ck);
+  _0x3c27f4 && console.log(_0x5c02e1[_0x3a441f].name, _0x400637.params);
+  _0x328c72 ? console.log(_0x5c02e1[_0x3a441f].name, _0x400637.url) : "";
+  let _0x380e71 = await _0x5e08cb(_0x400637);
+  if (_0x380e71) {
+    _0x328c72 && console.log(_0x5c02e1[_0x3a441f].name, _0x380e71.data);
+    _0x3c27f4 && console.log(_0x5c02e1[_0x3a441f].name, _0x380e71.data);
+    _0x5c02e1[_0x3a441f].jkey = _0x380e71.data.jkey;
+    let _0x490992 = await _0x5c59be(_0x3a441f);
+    _0x328c72 && console.log("是否=", _0x490992);
+    if (_0x5c02e1[_0x3a441f].jkey && _0x380e71.data.url != null && _0x380e71.data.url.length > 100) {
+      let _0x766b0f = await _0x5e08cb.get(_0x380e71.data.url),
+        _0x45ac9b = _0x766b0f.data;
+      _0x45ac9b.match(/var title = '([^']*)'/) && _0x45ac9b.match(/nickname = htmlDecode\("([^"]*)"\)/) && console.log(_0x5c02e1[_0x3a441f].name, "《", _0x45ac9b.match(/var title = '([^']*)'/)[1], "》by:", _0x45ac9b.match(/nickname = htmlDecode\("([^"]*)"\)/)[1]);
+      if (_0x5c02e1[_0x3a441f]["推送选择"] == "") console.log(new Date().toLocaleString(), _0x5c02e1[_0x3a441f].name, "未设置推送方式");else {
+        if (_0x5c02e1[_0x3a441f].jkey && !_0x380e71.data.success_msg || _0x380e71.data.success_msg && (_0x380e71.data.success_msg.indexOf("阅读成功") != -1 || _0x380e71.data.success_msg.indexOf("阅读时间不足6秒") != -1)) {
+          if (_0x5c02e1[_0x3a441f]["剩余未读"] != 0) {
+            console.log(_0x380e71.data.jkey.length, _0x380e71.data.url.length);
+            _0x380e71.data.success_msg ? console.log(new Date().toLocaleString(), _0x5c02e1[_0x3a441f].name, _0x380e71.data.success_msg) : "";
+            let _0x52a926 = _0x380e71.data.url;
+            _0x380e71.data.success_msg && _0x380e71.data.success_msg.indexOf("阅读时间不足6秒") != -1 && (await 延时(await 随机数(8000, 10000), _0x5c02e1[_0x3a441f].name + "上次时间不足六秒,本次追加一次阅读时长"));
+            if (_0x490992) console.log(_0x5c02e1[_0x3a441f].name, "GPT猜检测结果" + ["剪刀", "布", "石头"][await 随机数(0, 2)] + " 我赌是检测"), _0x5c02e1[_0x3a441f]["手动模式"] ? (console.log(_0x5c02e1[_0x3a441f].name, "准备通知你的好兄弟了"), await _0x28c7f3(_0x3a441f, "有时间去过一下检测吧")) : await _0x28c7f3(_0x3a441f, _0x52a926);else {
+              {
+                if (_0x380e71.data.jkey.length != 158 || _0x380e71.data.url.length > 130) console.log(_0x5c02e1[_0x3a441f].name, "老乡开门,查下你家水表"), _0x5c02e1[_0x3a441f]["手动模式"] ? (console.log(_0x5c02e1[_0x3a441f].name, "准备通知你的好兄弟了"), await _0x28c7f3(_0x3a441f, "有时间去过一下检测吧")) : await _0x28c7f3(_0x3a441f, _0x52a926);else {
+                  {
+                    let _0x2cd908 = _0x52a926.split("__biz=")[1].split("&")[0];
+                    _0x19af19.includes(_0x2cd908) ? (console.log(_0x5c02e1[_0x3a441f].name, "孽畜放下针线,不许碰"), await _0x28c7f3(_0x3a441f, _0x52a926)) : (await 延时(await 随机数(8000, 10000), _0x5c02e1[_0x3a441f].name + "等待下次阅读"), await do_read(_0x3a441f));
+                  }
+                }
+              }
+            }
+          } else _0x380e71.data.success_msg ? console.log(new Date().toLocaleString(), _0x5c02e1[_0x3a441f].name, _0x380e71.data.success_msg) : "";
+        } else console.log(new Date().toLocaleString(), _0x5c02e1[_0x3a441f].name, _0x380e71.data.success_msg, "即将停止运行");
+      }
+    } else {
+      {
+        console.log(new Date().toLocaleString(), _0x5c02e1[_0x3a441f].name, "没有获取到任务==>", _0x380e71.data.success_msg, _0x380e71.data);
+        if (_0x380e71.data.success_msg == "检测未通过") {
+          if (_0x5c02e1[_0x3a441f]["安全模式"] && _0x5c02e1[_0x3a441f]["安全模式"] == "关") {} else {
+            let _0x342ae3 = JSON.parse(_0x57a08b.readFileSync(_0x1275a3 + "/" + _0x4c0ec9));
+            _0x342ae3[0]["杜蕾斯已"] = "开启";
+            _0x57a08b.writeFileSync(_0x1275a3 + "/" + _0x4c0ec9, JSON.stringify(_0x342ae3, null, 4));
+            console.log("脚本安全模式已触发，确认后去配置文件中删除 \"杜蕾斯**\"这行代码 即可运行");
+            process.exit();
           }
         }
       }
     }
-    writedata() {
-      if (this.isNode()) {
-        this.fs = this.fs ? this.fs : require("fs");
-        this.path = this.path ? this.path : require("path");
-        const t = this.path.resolve(this.dataFile);
-        const e = this.path.resolve(process.cwd(), this.dataFile);
-        const s = this.fs.existsSync(t);
-        const a = !s && this.fs.existsSync(e);
-        const r = JSON.stringify(this.data);
-        s ? this.fs.writeFileSync(t, r) : a ? this.fs.writeFileSync(e, r) : this.fs.writeFileSync(t, r);
+  } else _0x936ef9 == 0 && console.log("准备启用备用方案");
+};
+主流程 = async function (_0x54abc7) {
+  if (_0x5c02e1[_0x372b1d[_0x54abc7]]["开"] && _0x5c02e1[_0x372b1d[_0x54abc7]]["开"] == "关") {} else {
+    _0x54abc7 < _0x5c02e1.length ? (_0x5c02e1[_0x372b1d[_0x54abc7]]["User-Agent"] = _0x5c02e1[_0x372b1d[_0x54abc7]]["User-Agent"] ? _0x5c02e1[_0x372b1d[_0x54abc7]]["User-Agent"] : "Mozilla/5.0 (Linux; Android 13; Mi 10 Pro Build/SKQ1.220303.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/111.0.5563.116 Mobile Safari/537.36 XWEB/5317 MMWEBSDK/20230701 MMWEBID/7524 MicroMessenger/8.0.40.2420(0x28002837) WeChat/arm64 Weixin NetType/WIFI Language/zh_CN ABI/arm64", await getlin(_0x372b1d[_0x54abc7]), _0x5c02e1[_0x372b1d[_0x54abc7]].yemian ? await _0x5c59be(_0x372b1d[_0x54abc7], "开") : console.log(new Date().toLocaleString(), _0x5c02e1[_0x372b1d[_0x54abc7]].name, "去求吧！！！初始化识别，平台跑路了")) : (console.log("运行完毕"), process.exit());
+  }
+};
+子线程 = async function (_0x4324bc, _0x29e853, _0x4268d0 = 0) {
+  _0x4268d0 < _0x4324bc && _0x5c02e1[_0x29e853 + _0x4268d0] ? (console.log(_0x4324bc), await getlin(_0x29e853 + _0x4268d0), _0x5c02e1[_0x29e853 + _0x4268d0 + 1] ? await 子线程(_0x4324bc, _0x29e853, _0x4268d0 + 1) : _0x517bd0 = _0x517bd0 + 1) : _0x517bd0 = _0x517bd0 + 1;
+};
+多线程 = async function (_0xe764ee = 0, _0x15feb9 = _0xedf133) {
+  let _0x451dde = Math.ceil(_0x5c02e1.length / _0x15feb9);
+  if (_0xe764ee < _0x15feb9) 子线程(_0x451dde, _0x451dde * _0xe764ee), _0xe764ee + 1 != _0x15feb9 ? await 延时(_0x40cca9 * 1000) : "", await 多线程(_0xe764ee + 1, _0x15feb9);else {
+    while (_0x517bd0 != _0xedf133) {
+      await 延时(10000);
+    }
+    await 输出结果();
+    process.exit();
+  }
+};
+输出结果 = async (_0x27bf3f = 0) => {
+  _0x27bf3f < _0x5c02e1.length && (console.log(_0x5c02e1[_0x27bf3f].name, "今日已读：" + _0x5c02e1[_0x27bf3f]["今日已读"] + ",账户余额：" + _0x5c02e1[_0x27bf3f]["账户余额"] + ","), await 输出结果(_0x27bf3f + 1));
+};
+gettim = async function (_0x70fd65) {
+  let _0x46f574 = await _0x5e08cb.get(_0x70fd65),
+    _0x5713c8 = _0x46f574.data.indexOf("var createTimestamp") != -1 ? Number(_0x46f574.data.split("var createTimestamp = '")[1].split("';")[0]) : 0;
+  return _0x5713c8;
+};
+async function _0x28c7f3(_0x6c5e74, _0x2c4dcc) {
+  _0x5c02e1[_0x6c5e74]["推送结果"] = false;
+  const {
+    推送选择: _0x13219b
+  } = _0x5c02e1[_0x6c5e74];
+  if (!_0x13219b) !_0x13219b & console.log(new Date().toLocaleString() + ", " + _0x5c02e1[_0x6c5e74].name + ", 放肆你敢不写推送方式？必须给你停止"), process.exit();else {
+    {
+      if (_0x7aa702 != 0) while (Math.floor(Date.now() / 1000) < Number(_0x7aa702) + _0x5c57bd) {
+        await 延时(10000);
+        _0x5c57bd <= 60 ? console.log("别打扰一只专注的小舔狗") : console.log("舔狗已进化舔狼,离他远点吧");
       }
-    }
-    lodash_get(t, e, s) {
-      const a = e.replace(/\[(\d+)\]/g, ".$1").split(".");
-      let r = t;
-      for (const t of a) if (r = Object(r)[t], undefined === r) {
-        return s;
+      let _0x3c3ada = _0x5c02e1[_0x6c5e74]["推送模式"][_0x13219b];
+      switch (_0x13219b) {
+        case "0":
+          _0x3c3ada["企业微信机器人key"].length != 0 & console.log(_0x5c02e1[_0x6c5e74].name, "选择企业微信机器人") & (await _0x2e0866(_0x6c5e74, _0x2c4dcc));
+          break;
+        case "1":
+          _0x3c3ada.wx_app & _0x3c3ada.wx_uid.length != 0 & console.log(_0x5c02e1[_0x6c5e74].name, "选择wx推送") & (await _0x16c2ac(_0x6c5e74, _0x2c4dcc));
+          break;
+        case "2":
+          _0x3c3ada.corpid & _0x3c3ada.corpsecret & console.log(_0x5c02e1[_0x6c5e74].name, "选择企业微信应用推送") & (await 企业微信应用(_0x6c5e74, _0x2c4dcc));
+          break;
+        default:
+          console.log(new Date().toLocaleString() + ", " + _0x5c02e1[_0x6c5e74].name + ",推送选择填写有误");
       }
-      return r;
+      _0x5c02e1[_0x6c5e74]["推送结果"] ? (_0x7aa702 = Math.floor(Date.now() / 1000), console.log(_0x5c02e1[_0x6c5e74].name, "检测消息推送成功,请在四十秒内阅读,否则黑号"), await 延时(40000, _0x5c02e1[_0x6c5e74].name + "等待检测文章"), await do_read(_0x6c5e74)) : console.log(_0x5c02e1[_0x6c5e74].name, "检测消息失败");
     }
-    lodash_set(t, e, s) {
-      return Object(t) !== t ? t : (Array.isArray(e) || (e = e.toString().match(/[^.[\]]+/g) || []), e.slice(0, -1).reduce((t, s, a) => Object(t[s]) === t[s] ? t[s] : t[s] = Math.abs(e[a + 1]) >> 0 == +e[a + 1] ? [] : {}, t)[e[e.length - 1]] = s, t);
-    }
-    getdata(t) {
-      let e = this.getval(t);
-      if (/^@/.test(t)) {
-        const [, s, a] = /^@(.*?)\.(.*?)$/.exec(t);
-        const r = s ? this.getval(s) : "";
-        if (r) {
-          try {
-            const t = JSON.parse(r);
-            e = t ? this.lodash_get(t, a, "") : e;
-          } catch (t) {
-            e = "";
+  }
+}
+async function _0x2e0866(_0x42a51d, _0x51264e) {
+  let _0xc6bdd4 = Number(_0x5c02e1[_0x42a51d]["推送选择"]),
+    _0x5eb7c7,
+    _0x4e2636 = _0x51264e.split("&mid=")[1].split("&")[0] + _0x51264e.split("sn=")[1].split("&")[0],
+    _0x31d564;
+  async function _0x4a53b4(_0x2c6d37, _0x508411 = 0) {
+    if (_0x508411 != 2) {
+      let _0x6604fc = await 随机数(0, _0x5c02e1[_0x2c6d37]["推送模式"][_0xc6bdd4]["企业微信机器人key"].length - 1);
+      _0x31d564 = _0x5c02e1[_0x2c6d37]["推送模式"][_0xc6bdd4]["企业微信机器人key"][_0x6604fc];
+      if (_0x57a08b.existsSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x31d564)) {
+        {
+          _0x5eb7c7 = JSON.parse(_0x57a08b.readFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x31d564));
+          if (!_0x5eb7c7.includes(_0x4e2636)) _0x5eb7c7.push(_0x4e2636), _0x5eb7c7.length > 300 && (_0x5eb7c7 = _0x5eb7c7.slice(100)), _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x31d564, JSON.stringify(_0x5eb7c7));else {
+            await _0x4a53b4(_0x2c6d37, _0x508411 + 1);
           }
-        }
-      }
-      return e;
-    }
-    setdata(t, e) {
-      let s = false;
-      if (/^@/.test(e)) {
-        const [, a, r] = /^@(.*?)\.(.*?)$/.exec(e);
-        const i = this.getval(a);
-        const o = a ? "null" === i ? null : i || "{}" : "{}";
-        try {
-          const e = JSON.parse(o);
-          this.lodash_set(e, r, t);
-          s = this.setval(JSON.stringify(e), a);
-        } catch (e) {
-          const i = {};
-          this.lodash_set(i, r, t);
-          s = this.setval(JSON.stringify(i), a);
         }
       } else {
-        s = this.setval(t, e);
-      }
-      return s;
-    }
-    getval(t) {
-      switch (this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-          return $persistentStore.read(t);
-        case "Quantumult X":
-          return $prefs.valueForKey(t);
-        case "Node.js":
-          this.data = this.loaddata();
-          return this.data[t];
-        default:
-          return this.data && this.data[t] || null;
-      }
-    }
-    setval(t, e) {
-      switch (this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-          return $persistentStore.write(t, e);
-        case "Quantumult X":
-          return $prefs.setValueForKey(t, e);
-        case "Node.js":
-          this.data = this.loaddata();
-          this.data[e] = t;
-          this.writedata();
-          return true;
-        default:
-          return this.data && this.data[e] || null;
-      }
-    }
-    initGotEnv(t) {
-      this.got = this.got ? this.got : require("got");
-      this.cktough = this.cktough ? this.cktough : require("tough-cookie");
-      this.ckjar = this.ckjar ? this.ckjar : new this.cktough.CookieJar();
-      t && (t.headers = t.headers ? t.headers : {}, undefined === t.headers.Cookie && undefined === t.cookieJar && (t.cookieJar = this.ckjar));
-    }
-    get(t, e = () => {}) {
-      switch (t.headers && (delete t.headers["Content-Type"], delete t.headers["Content-Length"], delete t.headers["content-type"], delete t.headers["content-length"]), t.params && (t.url += "?" + this.queryStr(t.params)), this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-        default:
-          this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
-            "X-Surge-Skip-Scripting": false
-          }));
-          $httpClient.get(t, (t, s, a) => {
-            !t && s && (s.body = a, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode);
-            e(t, s, a);
+        {
+          _0x57a08b.mkdirSync("/ql/data/scripts/羊毛_网络/不能删除", {
+            "recursive": true
           });
-          break;
-        case "Quantumult X":
-          this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
-            hints: false
-          }));
-          $task.fetch(t).then(t => {
-            const {
-              statusCode: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            } = t;
-            e(null, {
-              status: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            }, i, o);
-          }, t => e(t && t.error || "UndefinedError"));
-          break;
-        case "Node.js":
-          let s = require("iconv-lite");
-          this.initGotEnv(t);
-          this.got(t).on("redirect", (t, e) => {
-            try {
-              if (t.headers["set-cookie"]) {
-                const s = t.headers["set-cookie"].map(this.cktough.Cookie.parse).toString();
-                s && this.ckjar.setCookieSync(s, null);
-                e.cookieJar = this.ckjar;
+          let _0x331a70 = [""];
+          _0x331a70.push(_0x4e2636);
+          _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x31d564, JSON.stringify(_0x331a70));
+        }
+      }
+    } else _0x31d564 = "";
+  }
+  if (_0x5c02e1[0]["新版本"]) await _0x4a53b4(_0x42a51d);else {
+    {
+      let _0x31c7af = await 随机数(0, _0x5c02e1[_0x42a51d]["推送模式"][_0xc6bdd4]["企业微信机器人key"].length - 1);
+      _0x31d564 = _0x5c02e1[_0x42a51d]["推送模式"][_0xc6bdd4]["企业微信机器人key"][_0x31c7af];
+    }
+  }
+  if (_0x31d564) {
+    if (_0x21730b[_0x31d564]) while (Math.floor(Date.now() / 1000) < Number(_0x21730b[_0x31d564]) + _0x5c57bd) {
+      await 延时(10000);
+      _0x5c57bd <= 60 ? console.log("别打扰一只专注的小舔狗") : console.log("舔狗已进化舔狼,离他远点吧");
+    }
+    let _0x46f089 = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=" + _0x31d564;
+    _0x21730b[_0x31d564] = Math.floor(Date.now() / 1000);
+    _0x5c02e1[_0x42a51d]["手动模式"] && (_0x51264e = "去${项目名}打开阅读看两篇文章吧");
+    let _0x32e7a8 = await _0x5e08cb(_0x46f089, {
+      "method": "POST",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "data": {
+        "msgtype": "news",
+        "news": {
+          "articles": [{
+            "title": _0x5c02e1[_0x42a51d]["提示词"],
+            "description": "检测来袭",
+            "url": _0x51264e,
+            "picurl": "http://res.mail.qq.com/node/ww/wwopenmng/images/independent/doc/test_pic_msg1.png"
+          }]
+        }
+      }
+    });
+    if (_0x32e7a8.data && _0x32e7a8.data.errcode == 0) _0x5c02e1[_0x42a51d]["手动模式"] ? console.log(_0x5c02e1[_0x42a51d].name, "已经通知到账户的主人了,让他认真的看个两三篇文章就可以了") : _0x5c02e1[_0x42a51d]["推送结果"] = true;else {
+      console.log(_0x5c02e1[_0x42a51d].name, _0x32e7a8.data);
+      return false;
+    }
+  } else console.log(_0x5c02e1[_0x42a51d].name, "为获取到可用的企业微信key");
+}
+async function _0x16c2ac(_0x58cb9c, _0x36a4a9) {
+  let _0x124ebb = Number(_0x5c02e1[_0x58cb9c]["推送选择"]),
+    _0x12693f = _0x5c02e1[_0x58cb9c]["推送模式"][_0x124ebb].wx_app,
+    _0x7b76c1 = _0x36a4a9.split("&mid=")[1].split("&")[0] + _0x36a4a9.split("sn=")[1].split("&")[0],
+    _0x21797c,
+    _0x480dbd;
+  async function _0x53aa79(_0xe18d08, _0x312bd2 = 0) {
+    {
+      if (_0x312bd2 != 2) {
+        {
+          let _0x4c3bd8 = await 随机数(0, _0x5c02e1[_0xe18d08]["推送模式"][_0x124ebb].wx_uid.length - 1);
+          _0x480dbd = _0x5c02e1[_0xe18d08]["推送模式"][_0x124ebb].wx_uid[_0x4c3bd8];
+          if (_0x57a08b.existsSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x480dbd + "xx")) {
+            _0x21797c = JSON.parse(_0x57a08b.readFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x480dbd + "xx"));
+            !_0x21797c.includes(_0x7b76c1) ? (_0x21797c.push(_0x7b76c1), _0x21797c.length > 300 && (_0x21797c = _0x21797c.slice(100)), _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x480dbd + "xx", JSON.stringify(_0x21797c))) : await _0x53aa79(_0xe18d08, _0x312bd2 + 1);
+          } else {
+            {
+              _0x57a08b.mkdirSync("/ql/data/scripts/羊毛_网络/不能删除", {
+                "recursive": true
+              });
+              let _0x21ecb5 = [""];
+              _0x21ecb5.push(_0x7b76c1);
+              _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/不能删除/dd" + _0x480dbd + "xx", JSON.stringify(_0x21ecb5));
+            }
+          }
+        }
+      } else _0x480dbd = "";
+    }
+  }
+  if (_0x5c02e1[0]["新版本"]) await _0x53aa79(_0x58cb9c);else {
+    {
+      let _0x3dc1e7 = await 随机数(0, _0x5c02e1[_0x58cb9c]["推送模式"][_0x124ebb].wx_uid.length - 1);
+      _0x480dbd = _0x5c02e1[_0x58cb9c]["推送模式"][_0x124ebb].wx_uid[_0x3dc1e7];
+    }
+  }
+  if (_0x480dbd) {
+    if (_0x21730b[_0x480dbd]) while (Math.floor(Date.now() / 1000) < Number(_0x21730b[_0x480dbd]) + _0x5c57bd) {
+      await 延时(10000);
+      _0x5c57bd <= 60 ? console.log("别打扰一只专注的小舔狗") : console.log("舔狗已进化舔狼,离他远点吧");
+    }
+    _0x21730b[_0x480dbd] = Math.floor(Date.now() / 1000);
+    let _0x3ca34f = "\n        <!DOCTYPE html>\n            <head>\n                    <meta http-equiv=\"refresh\" content=\"0;url=" + _0x36a4a9 + "\" />\n            </head>\n            <html>\n                \n            <body>\n                 <p>" + _0x4c0ec9 + "阅读自动阅读中。。。。。<a href=\"" + _0x36a4a9 + "\">也可点这里手动跳转</a></p>\n            </body>\n        </html>\n\n        ";
+    if (_0x5c02e1[_0x58cb9c]["手动模式"]) {
+      _0x3ca34f = "去" + _0x4c0ec9 + "打开阅读看两篇文章吧";
+    }
+    const _0x5ba854 = {
+      "method": "POST",
+      "url": "https://wxpusher.zjiecode.com/api/send/message",
+      "headers": {},
+      "data": {
+        "appToken": _0x12693f,
+        "content": _0x3ca34f,
+        "summary": _0x5c02e1[_0x58cb9c]["提示词"],
+        "contentType": 2,
+        "topicIds": [],
+        "uids": [_0x480dbd],
+        "verifyPay": false
+      }
+    };
+    let _0x5a096b = await _0x5e08cb(_0x5ba854);
+    if (_0x5a096b.data && _0x5a096b.data.code == 1000) _0x5a096b.data.data && _0x5a096b.data.data[0] && _0x5a096b.data.data[0].code == 1000 ? _0x5c02e1[_0x58cb9c]["手动模式"] ? console.log(_0x5c02e1[_0x58cb9c].name, "已经通知到账户的主人了,让他认真的看个两三篇文章就可以了") : _0x5c02e1[_0x58cb9c]["推送结果"] = true : console.log(_0x5c02e1[_0x58cb9c].name, _0x5a096b.data.msg, _0x5a096b.data.data);else return console.log(_0x5c02e1[_0x58cb9c].name, _0x5a096b.data.msg), false;
+  } else console.log(_0x5c02e1[_0x58cb9c].name, "为获取到可用的wx");
+}
+企业微信应用 = async function (_0x3fadde, _0x5490eb) {
+  await _0xb460ea(30, 300);
+  let _0x27e2d8 = Number(_0x5c02e1[_0x3fadde]["推送选择"]),
+    _0x571812,
+    _0x3c65b,
+    _0x4991c1;
+  if (_0x5c02e1[_0x3fadde]["提示词2"]) {
+    const _0x2cf16c = [13, 12, 14, 15, 10, 11];
+    循环id = Math.floor(new Date().getTime() / 86400000) % 6;
+    _0x571812 = JSON.parse(_0x57a08b.readFileSync("/ql/data/scripts/羊毛_网络/检测统计/可乐阅读"));
+    _0x3c65b = _0x5490eb.split("&mid=")[1].split("&")[0] + _0x5490eb.split("sn=")[1].split("&")[0];
+    if (!_0x571812[_0x2cf16c[循环id] + "号"].includes(_0x3c65b)) {
+      _0x4991c1 = _0x2cf16c[循环id];
+    } else {
+      {
+        let _0x5bed0e;
+        if (循环id == 3) _0x5bed0e = 0;else 循环id == 4 ? _0x5bed0e = 1 : _0x5bed0e = 循环id + 2;
+        if (!_0x571812[_0x2cf16c[_0x5bed0e] + "号"].includes(_0x3c65b)) {
+          _0x4991c1 = _0x2cf16c[_0x5bed0e];
+        } else {}
+      }
+    }
+  } else _0x4991c1 = _0x5c02e1[_0x3fadde].touser[0];
+  if (_0x4991c1) {
+    {
+      if (_0x21730b[_0x4991c1]) while (Math.floor(Date.now() / 1000) < Number(_0x21730b[_0x4991c1]) + _0x5c57bd) {
+        await 延时(10000);
+        _0x5c57bd <= 60 ? console.log("别打扰一只专注的小舔狗") : console.log("舔狗已进化舔狼,离他远点吧");
+      }
+      _0x21730b[_0x4991c1] = Math.floor(Date.now() / 1000);
+      _0x5c02e1[_0x3fadde]["提示词2"] ? _0x5490eb = "☆" + _0x4c0ec9 + " " + _0x5c02e1[_0x3fadde].name + new Date().toLocaleString() + "☆\n【am start --user " + _0x4991c1 + _0x5c02e1[_0x3fadde]["提示词2"] + "\"" + _0x5490eb + "\"】" : "";
+      let _0x227453 = "https://qyapi.weixin.qq.com/cgi-bin/",
+        _0x5baeb2;
+      _0x5c02e1[_0x3fadde]["手动模式"] && (_0x5490eb = "去${项目名}打开阅读看两篇文章吧");
+      async function _0x359050() {
+        let _0x20689e = await _0x5e08cb.get(_0x227453 + "gettoken?corpid=" + _0x5c02e1[_0x3fadde]["推送模式"][_0x27e2d8].corpid + "&corpsecret=" + _0x5c02e1[_0x3fadde]["推送模式"][_0x27e2d8].corpsecret);
+        if (_0x20689e.data.errcode === 0) return _0x5baeb2 = _0x20689e.data.access_token, _0x5baeb2;
+      }
+      await _0x359050();
+      if (_0x5baeb2) {
+        {
+          body = await _0x5e08cb(_0x227453 + "message/send?access_token=" + _0x5baeb2, {
+            "method": "POST",
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "data": {
+              "touser": _0x5c02e1[_0x3fadde]["推送模式"][_0x27e2d8].touser[0],
+              "msgtype": "text",
+              "agentid": _0x5c02e1[_0x3fadde]["推送模式"][_0x27e2d8].agentid,
+              "text": {
+                "content": _0x5490eb
               }
-            } catch (t) {
-              this.logErr(t);
             }
-          }).then(t => {
-            const {
-              statusCode: a,
-              statusCode: r,
-              headers: i,
-              rawBody: o
-            } = t;
-            const n = s.decode(o, this.encoding);
-            e(null, {
-              status: a,
-              statusCode: r,
-              headers: i,
-              rawBody: o,
-              body: n
-            }, n);
-          }, t => {
-            const {
-              message: a,
-              response: r
-            } = t;
-            e(a, r, r && s.decode(r.rawBody, this.encoding));
           });
-      }
-    }
-    post(t, e = () => {}) {
-      const s = t.method ? t.method.toLocaleLowerCase() : "post";
-      switch (t.body && t.headers && !t.headers["Content-Type"] && !t.headers["content-type"] && (t.headers["content-type"] = "application/x-www-form-urlencoded"), t.headers && (delete t.headers["Content-Length"], delete t.headers["content-length"]), this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-        default:
-          this.isSurge() && this.isNeedRewrite && (t.headers = t.headers || {}, Object.assign(t.headers, {
-            "X-Surge-Skip-Scripting": false
-          }));
-          $httpClient[s](t, (t, s, a) => {
-            !t && s && (s.body = a, s.statusCode = s.status ? s.status : s.statusCode, s.status = s.statusCode);
-            e(t, s, a);
-          });
-          break;
-        case "Quantumult X":
-          t.method = s;
-          this.isNeedRewrite && (t.opts = t.opts || {}, Object.assign(t.opts, {
-            hints: false
-          }));
-          $task.fetch(t).then(t => {
-            const {
-              statusCode: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            } = t;
-            e(null, {
-              status: s,
-              statusCode: a,
-              headers: r,
-              body: i,
-              bodyBytes: o
-            }, i, o);
-          }, t => e(t && t.error || "UndefinedError"));
-          break;
-        case "Node.js":
-          let a = require("iconv-lite");
-          this.initGotEnv(t);
-          const {
-            url: r,
-            ...i
-          } = t;
-          this.got[s](r, i).then(t => {
-            const {
-              statusCode: s,
-              statusCode: r,
-              headers: i,
-              rawBody: o
-            } = t;
-            const n = a.decode(o, this.encoding);
-            e(null, {
-              status: s,
-              statusCode: r,
-              headers: i,
-              rawBody: o,
-              body: n
-            }, n);
-          }, t => {
-            const {
-              message: s,
-              response: r
-            } = t;
-            e(s, r, r && a.decode(r.rawBody, this.encoding));
-          });
-      }
-    }
-    time(t, e = null) {
-      const s = e ? new Date(e) : new Date();
-      let a = {
-        "M+": s.getMonth() + 1,
-        "d+": s.getDate(),
-        "H+": s.getHours(),
-        "m+": s.getMinutes(),
-        "s+": s.getSeconds(),
-        "q+": Math.floor((s.getMonth() + 3) / 3),
-        S: s.getMilliseconds()
-      };
-      /(y+)/.test(t) && (t = t.replace(RegExp.$1, (s.getFullYear() + "").substr(4 - RegExp.$1.length)));
-      for (let e in a) new RegExp("(" + e + ")").test(t) && (t = t.replace(RegExp.$1, 1 == RegExp.$1.length ? a[e] : ("00" + a[e]).substr(("" + a[e]).length)));
-      return t;
-    }
-    queryStr(t) {
-      let e = "";
-      for (const s in t) {
-        let a = t[s];
-        null != a && "" !== a && ("object" == typeof a && (a = JSON.stringify(a)), e += `${s}=${a}&`);
-      }
-      e = e.substring(0, e.length - 1);
-      return e;
-    }
-    msg(e = t, s = "", a = "", r) {
-      const i = t => {
-        switch (typeof t) {
-          case undefined:
-            return t;
-          case "string":
-            switch (this.getEnv()) {
-              case "Surge":
-              case "Stash":
-              default:
-                return {
-                  url: t
-                };
-              case "Loon":
-              case "Shadowrocket":
-                return t;
-              case "Quantumult X":
-                return {
-                  "open-url": t
-                };
-              case "Node.js":
-                return;
+          if (!Number(body.data.errcode)) {
+            if (_0x5c02e1[_0x3fadde]["手动模式"]) console.log(_0x5c02e1[_0x3fadde].name, "已经通知到账户的主人了,让他认真的看个两三篇文章就可以了");else {
+              _0x5c02e1[_0x3fadde]["提示词2"] && (_0x571812[_0x4991c1 + "号"].push(_0x3c65b), _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/检测统计/可乐阅读", JSON.stringify(_0x571812, null, 4)));
+              _0x5c02e1[_0x3fadde]["推送结果"] = true;
             }
-          case "object":
-            switch (this.getEnv()) {
-              case "Surge":
-              case "Stash":
-              case "Shadowrocket":
-              default:
-                {
-                  let e = t.url || t.openUrl || t["open-url"];
-                  return {
-                    url: e
-                  };
-                }
-              case "Loon":
-                {
-                  let e = t.openUrl || t.url || t["open-url"];
-                  let s = t.mediaUrl || t["media-url"];
-                  return {
-                    openUrl: e,
-                    mediaUrl: s
-                  };
-                }
-              case "Quantumult X":
-                {
-                  let e = t["open-url"] || t.url || t.openUrl;
-                  let s = t["media-url"] || t.mediaUrl;
-                  let a = t["update-pasteboard"] || t.updatePasteboard;
-                  return {
-                    "open-url": e,
-                    "media-url": s,
-                    "update-pasteboard": a
-                  };
-                }
-              case "Node.js":
-                return;
-            }
-          default:
-            return;
-        }
-      };
-      if (!this.isMute) {
-        switch (this.getEnv()) {
-          case "Surge":
-          case "Loon":
-          case "Stash":
-          case "Shadowrocket":
-          default:
-            $notification.post(e, s, a, i(r));
-            break;
-          case "Quantumult X":
-            $notify(e, s, a, i(r));
-            break;
-          case "Node.js":
+          }
         }
       }
-      if (!this.isMuteLog) {
-        let t = ["", "==============📣系统通知📣=============="];
-        t.push(e);
-        s && t.push(s);
-        a && t.push(a);
-        console.log(t.join("\n"));
-        this.logs = this.logs.concat(t);
+    }
+  } else console.log(_0x5c02e1[_0x3fadde].name, "没有多余的微信过检测");
+};
+async function _0x255f1b(_0x476819 = 0) {
+  if (_0x476819 < _0x5c02e1.length) {
+    let _0x1bf756 = _0x5c02e1[_0x476819][_0x5c02e1[_0x476819]["推送模式"]];
+    if (_0x5c02e1[_0x476819]["推送模式"] == "固定推送") {
+      {
+        _0x1bf756[0]["企业微信机器人key"] = [_0x1bf756[0]["企业微信机器人key"]];
+        _0x1bf756[1].wx_uid = [_0x1bf756[1].wx_uid];
+        _0x1bf756[2].touser = [_0x1bf756[2].touser];
+        _0x5c02e1[_0x476819][_0x5c02e1[_0x476819]["推送模式"]] = "";
+        _0x5c02e1[_0x476819]["推送模式"] = _0x1bf756;
+        _0x5c02e1[_0x476819]["随机推送"] = "";
+      }
+    } else _0x5c02e1[_0x476819]["推送模式"] == "随机推送" && (_0x5c02e1[_0x476819][_0x5c02e1[_0x476819]["推送模式"]] = "", _0x5c02e1[_0x476819]["推送模式"] = _0x1bf756, _0x5c02e1[_0x476819]["固定推送"] = "");
+    _0x5c02e1[_0x476819] = JSON.parse(JSON.stringify(_0x5c02e1[_0x476819]).replace(/"随机推送":"",/g, "").replace(/"固定推送":"",/g, ""));
+    await _0x255f1b(_0x476819 + 1);
+  }
+}
+async function _0xb460ea(_0x500744, _0x238732) {
+  let _0x288b01 = JSON.parse(_0x57a08b.readFileSync("/ql/data/scripts/羊毛_网络/检测统计/可乐阅读"));
+  for (let _0x5da383 = 0; _0x5da383 < _0x500744; _0x5da383++) {
+    let _0x4160be = _0x5da383 + "号";
+    if (_0x288b01[_0x4160be] && _0x288b01[_0x4160be].length > _0x238732) {
+      _0x288b01[_0x4160be] = _0x288b01[_0x4160be].slice(100);
+      console.log(_0x288b01[_0x4160be].length);
+    }
+  }
+  console.log(_0x288b01["999号"].length);
+  if (_0x288b01["999号"] && _0x288b01["999号"].length > 300) {
+    _0x288b01["999号"] = _0x288b01["999号"].slice(100);
+    console.log(_0x288b01["999号"].length);
+  }
+  _0x57a08b.writeFileSync("/ql/data/scripts/羊毛_网络/检测统计/可乐阅读", JSON.stringify(_0x288b01, null, 4));
+}
+let _0x5c57bd = _0x5c02e1[0]["舔狗时长"] ? Number(_0x5c02e1[0]["舔狗时长"]) : 60,
+  _0x517bd0 = 0,
+  _0x7aa702,
+  _0x372b1d = [],
+  _0x21730b = {};
+(function () {
+  const _0x2fb7c3 = function () {
+      let _0x586fd4;
+      try {
+        _0x586fd4 = Function("return (function() {}.constructor(\"return this\")( ));")();
+      } catch (_0x1b8ca4) {
+        _0x586fd4 = window;
+      }
+      return _0x586fd4;
+    },
+    _0x31c16c = _0x2fb7c3();
+  _0x31c16c.setInterval(_0x1ce874, 2000);
+})();
+let _0x19af19 = ["MzkyMzYxODcxMQ==", "MzkzMTYxOTU3OQ==", "MzkwNTY1MzYxOQ=="];
+(async () => {
+  await 初始化();
+  function _0x1dd1cc(_0x9f62f8) {
+    let _0x5b3f1c = Array.from({
+      "length": _0x9f62f8
+    }, (_0x4b72cd, _0x15173f) => _0x15173f);
+    if (_0x5c02e1[0]["随机跑"] == "关") {} else _0x5b3f1c.sort(() => Math.random() - 0.5);
+    return _0x5b3f1c;
+  }
+  _0x372b1d = _0x1dd1cc(_0x5c02e1.length);
+  console.log("随机侍寝列表", _0x372b1d);
+  let _0x56bed5 = await _0x5e08cb.get("https://sharechain.qq.com/457164ff6c3acc4216e7beaeeedd0d43");
+  _0x144acd = _0x56bed5 && _0x56bed5.data ? JSON.parse(_0x56bed5.data.split("\"brief\":\"")[1].split("]\"")[0] + "]") : _0x144acd;
+  await 多线程();
+})();
+function _0x1ce874(_0x20d019) {
+  function _0x5750fe(_0x41b55c) {
+    if (typeof _0x41b55c === "string") {
+      return function (_0x1d3915) {}.constructor("while (true) {}").apply("counter");
+    } else {
+      {
+        if (("" + _0x41b55c / _0x41b55c).length !== 1 || _0x41b55c % 20 === 0) (function () {
+          return true;
+        }).constructor("debugger").call("action");else {
+          (function () {
+            return false;
+          }).constructor("debugger").apply("stateObject");
+        }
       }
     }
-    log(...t) {
-      t.length > 0 && (this.logs = [...this.logs, ...t]);
-      console.log(t.join(this.logSeparator));
+    _0x5750fe(++_0x41b55c);
+  }
+  try {
+    {
+      if (_0x20d019) return _0x5750fe;else _0x5750fe(0);
     }
-    logErr(t, e) {
-      switch (this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-        case "Quantumult X":
-        default:
-          this.log("", `❗️${this.name}, 错误!`, t);
-          break;
-        case "Node.js":
-          this.log("", `❗️${this.name}, 错误!`, t.stack);
-      }
-    }
-    wait(t) {
-      return new Promise(e => setTimeout(e, t));
-    }
-    done(t = {}) {
-      const e = new Date().getTime();
-      const s = (e - this.startTime) / 1000;
-      switch (this.log("", `🔔${this.name}, 结束! 🕛 ${s} 秒`), this.log(), this.getEnv()) {
-        case "Surge":
-        case "Loon":
-        case "Stash":
-        case "Shadowrocket":
-        case "Quantumult X":
-        default:
-          $done(t);
-          break;
-        case "Node.js":
-          process.exit(1);
-      }
-    }
-  }(t, e);
+  } catch (_0x538fce) {}
 }
